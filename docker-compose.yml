@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: task-postgres
+    environment:
+      POSTGRES_DB: taskdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwerty
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - task-network
+
+  app:
+    build: .
+    container_name: task-app
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/taskdb
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: qwerty
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      APP_JWTSECRET: IlPZZo9TfRA85Imdqr1ONzxoNweIvY9o/8EDTxfDdO9Wi3K8M7yjyzK+MCjYeUnc
+      APP_JWTEXPIRATIONMS: 86400000
+    ports:
+      - "8090:8090"
+    networks:
+      - task-network
+
+volumes:
+  postgres-data:
+
+networks:
+  task-network:
+    driver: bridge
